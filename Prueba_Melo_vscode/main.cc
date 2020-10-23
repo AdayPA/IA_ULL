@@ -1,2 +1,0 @@
-#include <iostream>
-char sd;
