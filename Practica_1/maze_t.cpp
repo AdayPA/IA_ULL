@@ -160,4 +160,3 @@ void maze_t::camino(void){
  }
 
 }
-
