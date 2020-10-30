@@ -2,6 +2,9 @@
 #include "sll_node_t.hpp"
 #include "sll_t.hpp"
 
+#include <cassert>
+#include <math.h>
+#include <stdlib.h> 
 
 bool maze_t::solve()
 {
@@ -12,8 +15,9 @@ istream& maze_t::read(istream& is)
 {
   int m, n;
   is >> m >> n;
+  //cout << "m: " << m << "n: " << n;
   assert(m != 0 && n != 0);
-  
+ 
   matrix_.resize(m, n);
   visited_.resize(m, n);
   
@@ -58,78 +62,7 @@ bool maze_t::isOK(int i, int j)
 
 bool maze_t::solve(int i, int j)
 {
-  counter++;
-  // CASO BASE:
-  // retornar 'true' si 'i' y 'j' han llegado a la salida
-  if(matrix_(i,j)==END_ID) return true;
-
-  // marcamos la celda como visitada
-  visited_(i, j) = true;
-  
-  // CASO GENERAL:
-  // para cada una de las 4 posibles direcciones (N, E, S, W) ver si es posible
-  // el desplazamiento (isOK), y en ese caso, intentar resolver el laberinto
-  // llamando recursivamente a 'solve'. Si la llamada devuelve 'true', 
-  // propagarla retornando también 'true'
-
-/*
-
-for(int i_d=0;i_d<=2;i_d+=2){
-  for (int j_d=0;j_d<=2;j_d+=2){
-    if(isOK((i-1)+i_d,(j-1)+j_d)){
-      if(solve((i-1)+i_d,(j-1)+j_d)){
-        matrix_((i-1)+i_d,(j-1)+j_d)=PATH_SOL_ID;
-        return true;
-      }    
-    }
-  }
-}
-
-*/
-
-
-
-  if(isOK(i-1,j)){ //norte
-    if(solve(i-1,j)) {
-      matrix_(i-1,j)=PATH_SOL_ID;
-      list_.insert_head(new sll_node_t<char>('N'));
-      steps++; 
-      return true;
-    } 
-  }
-
-  if(isOK(i+1,j)){ //sur
-      if(solve(i+1,j)){
-      list_.insert_head(new sll_node_t<char>('S')); 
-      matrix_(i+1,j)=PATH_SOL_ID;
-      steps++; 
-        return true; 
-      } 
-   }
-
-  if(isOK(i,j-1)){ //oeste
-      if(solve(i,j-1)){
-      list_.insert_head(new sll_node_t<char>('W')); 
-      matrix_(i,j-1)=PATH_SOL_ID;
-      steps++; 
-        return true;  
-      } 
-   }
-
-  if(isOK(i,j+1)){ //este
-      if(solve(i,j+1)){
-      list_.insert_head(new sll_node_t<char>('E')); 
-      matrix_(i,j+1)=PATH_SOL_ID;
-      steps++; 
-        return true; 
-      }
-     }
-
-
-  // desmarcamos la celda como visitada (denominado "backtracking") y
-  // retornamos 'false'
-  visited_(i, j) = false;
-  return false;
+   return true;
 }
 
 istream& operator>>(istream& is, maze_t& M)
@@ -141,22 +74,21 @@ ostream& operator<<(ostream& os, const maze_t& M)
 }
 
 
-void maze_t::camino(void){
- if(list_.empty()){
-    cout<<"Enjoy the darkness because there is no escape";
-    cout<<endl;
-    cout<<counter<<endl;
- }else{
-    cout<<"This is the PATH for your freedom ("<<steps<<" pasos) :" <<endl;
+void maze_t::camino(void){}
 
-       sll_node_t<char>* aux=list_.head();
-    while(aux){
-       cout<<aux->get_data()<<"->";
-       aux=aux->get_next();
-       }
-    if(!aux) cout<<" Freedom cannot be bestowed, it must be achieved. (FRANKLIN D. ROOSEVELT)"<<endl;
-    cout<<endl;
-    cout<<counter<<endl;
- }
+void maze_t::add_manualobstacle(int i, int j){
+  matrix_(i, j) = WALL_ID;
+}
+
+void maze_t::add_autoobstacle(float percen){
+  int space = (matrix_.get_m() * matrix_.get_n()) - 2;
+  int temp = floor(space * percen);
+  for (int i = 0; i < temp; ++i){
+    auto v1 = rand() % matrix_.get_m() + 1;
+    auto v2 = rand() % matrix_.get_n() + 1;
+    if ((matrix_(v1,v2) != START_ID) || (matrix_(v1,v2) != END_ID)){
+      matrix_(v1, v2) = WALL_ID;
+    }
+  }
 
 }

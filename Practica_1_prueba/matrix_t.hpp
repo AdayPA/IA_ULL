@@ -6,6 +6,7 @@
 
 #include "vector_t.hpp"
 
+
 using namespace std;
 
 template <class T>
@@ -16,6 +17,7 @@ private:
         int n_;
         
         vector_t<T> v_;
+
         
 public:
         matrix_t(void):

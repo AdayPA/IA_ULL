@@ -54,11 +54,14 @@ public:
             i_end_(-1), j_end_(-1),list_(),
             steps(0), counter(0)
   { }
-    
+
   ~maze_t() {}
 
   bool solve(void);
   void camino(void);
+
+  void add_manualobstacle(int i, int j);
+  void add_autoobstacle(float percen);
 
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
