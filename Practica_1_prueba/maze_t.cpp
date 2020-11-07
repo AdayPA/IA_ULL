@@ -11,6 +11,47 @@ bool maze_t::solve()
   return solve(i_start_, j_start_);
 }
 
+void maze_t::ReadFile(void) {
+  ifstream file;
+  string data;
+  int n, m, valueformatrix;
+  int position = 0; 
+  int numberoflines = 0; // Hace la función de iterador i, cada vez que ocurre un getline(), se aumenta
+  bool readyformatrix = false;
+  bool valuedeployed = false;
+  file.open("maze1.txt");
+  while (getline(file, data)) {
+    if (readyformatrix == false) {
+      n = data[0] - '0';
+      m = data[2] - '0';
+      matrix_.resize(n, m);
+    }
+    if (readyformatrix ==  true) {
+      numberoflines++;
+      position = 0;
+      for (int j = 1; j <= n; j++) {
+        valuedeployed = false;
+        for (int k = 0; k < data.size(); k++) {
+          if (valuedeployed == false) {
+            valueformatrix = data[position] - '0';
+            valuedeployed = true;
+            if (position < data.size()) {
+              // Los valores van a estar de 2 en 2, por eso hago esta línea
+              position += 2;
+            }
+          }
+        }
+        if (valueformatrix == START_ID)    { i_start_ = numberoflines, j_start_ = j; }
+        else if (valueformatrix == END_ID) { i_end_   = numberoflines, j_end_   = j; }
+        matrix_(numberoflines, j) = valueformatrix;
+        }
+    }
+    readyformatrix =  true;
+  }
+  assert (i_start_ != -1 && j_start_ != -1 && i_end_ != -1 && j_end_ != -1);
+  file.close();
+}
+
 istream& maze_t::read(istream& is)
 {
   int m, n;

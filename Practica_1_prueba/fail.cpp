@@ -17,7 +17,8 @@ int main(void){
     switch(option){
       case 1: 
         cout << "Ingrese el nombre del fichero: ";
-        cin >> M;
+        M.ReadFile();
+        cout << M << endl;
         cout << "cargado;";
         break;
       case 2: 

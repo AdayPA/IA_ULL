@@ -5,6 +5,7 @@
 #include <forward_list>
 #include "sll_node_t.hpp"
 #include "sll_t.hpp"
+#include <fstream>
 
 //#define TRACE(x) cout << (#x) << ": " << (x) << endl
 
@@ -66,6 +67,7 @@ public:
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
 
+  void ReadFile(void);
 private:
   bool isOK(int, int);
   bool solve(int, int);
