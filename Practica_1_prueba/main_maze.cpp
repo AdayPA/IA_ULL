@@ -5,18 +5,38 @@ using namespace std;
 
 
 
-int main(int argc, char** argv){
-  
+int main(void){
+  bool boolean = true;
+  int option = 0;
   maze_t M;
-  cin >> M;
-  //M.add_manualobstacle(1,1);
-  M.add_autoobstacle(0.5);
+  M.ReadFile();
+  while (boolean){
+    cout << "Menú: " << endl;
+    cout << "\t1. Introducir fichero" << endl;
+    cout << "\t2. Resolver" << endl;
+    cout << "\t3. Salir del programa" << endl;
+    cin >> option;
+    switch(option){
+      case 1: 
+        cout << "Ingrese el nombre del fichero: ";
+        // M.ReadFile();
+        cout << M << endl;
+        cout << "cargado;";
+        break;
+      case 2:
+        cout << "Ha escogido resolver " << endl;
+        M.solve();
+        cout << M << endl;
+        break;  
+      case 3: 
+        cout << "Saliendo";
+        boolean = false;
+        break;
+    }
 
-  M.write();
+
+  }
   
-    
-  return 1;
-}
 
 
 /*
@@ -32,3 +52,6 @@ int main(int argc, char** argv){
 */
   
  // cout << M << endl;
+  
+  return 1;
+}

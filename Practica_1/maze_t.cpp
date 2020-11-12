@@ -90,6 +90,7 @@ for(int i_d=0;i_d<=2;i_d+=2){
 
 
   if(isOK(i-1,j)){ //norte
+    // calculo distancias --> distancia menor --> asigno PATH_SOL_ID
     if(solve(i-1,j)) {
       matrix_(i-1,j)=PATH_SOL_ID;
       list_.insert_head(new sll_node_t<char>('N'));
@@ -158,5 +159,3 @@ void maze_t::camino(void){
     cout<<endl;
     cout<<counter<<endl;
  }
-
-}
