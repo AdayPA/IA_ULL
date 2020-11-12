@@ -90,5 +90,4 @@ void maze_t::add_autoobstacle(float percen){
       matrix_(v1, v2) = WALL_ID;
     }
   }
-
 }
