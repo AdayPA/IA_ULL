@@ -65,9 +65,7 @@ public:
 	}
 
 	const T& at(int pos) const{
-		
 		assert((pos < sz_) && ((pos >= 0)));
-
 		return v_[pos];
 	}
 

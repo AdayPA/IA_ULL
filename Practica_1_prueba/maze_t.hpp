@@ -63,6 +63,7 @@ public:
 
   void add_manualobstacle(int i, int j);
   void add_autoobstacle(float percen);
+  int Manhattan(int i, int j);
 
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
