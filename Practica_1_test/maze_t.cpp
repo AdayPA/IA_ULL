@@ -230,5 +230,88 @@ void maze_t::camino(void){
     cout<<endl;
     cout<<counter<<endl;
  }
+}
 
+void maze_t::A_Start(void) {
+  visited_(i_start_, j_start_) = true;
+  std::vector<Node*> tree;
+  int minN = 10000;
+  int minS = 10000;
+  int minE = 10000;
+  int minO = 10000;
+  int stage = 0;
+  if (isOK(i_start_-1,j_start_)) { // norte  1
+    minN = Manhattan(i_start_-1,j_start_);
+    cout << "Puedo ir norte, calculo: " << minN << endl;
+    Node* a = new Node {minN,i_start_-1,j_start_,1,0};
+    tree.push_back(a);
+  }
+  if (isOK(i_start_+1,j_start_)) { // sur  2
+    minS = Manhattan(i_start_+1,j_start_);
+    cout << "Puedo ir sur, calculo: " << minS << endl;
+    Node* a = new Node {minS,i_start_+1,j_start_,2,0};
+    tree.push_back(a);
+  }
+  if (isOK(i_start_,j_start_-1)) { // oeste  3
+    minO = Manhattan(i_start_,j_start_-1);
+    cout << "Puedo ir oeste, calculo: " << minO << endl;
+    Node* a = new Node {minO,i_start_,j_start_-1,3,0};
+    tree.push_back(a);
+  }
+  if (isOK(i_start_,j_start_+1)) { // este  4
+    minE = Manhattan(i_start_,j_start_+1);
+    cout << "Puedo ir este, calculo: " << minE << endl;
+    Node* a = new Node {minE,i_start_,j_start_-1,4,0};
+    tree.push_back(a);
+  }
+  int actual_i = i_start_;
+  int actual_j = j_start_;
+  bool fin = false;
+
+  while (!tree.empty() && !fin) {
+    cout << "tamaño tree: "<<tree.size();
+    int temp = 50000;
+    int min_pos = -1;
+    for (int i = 0; i < tree.size(); ++i) {
+      if ( tree.at(i)->value_ < temp ) {
+        temp = tree.at(i)->value_;
+        min_pos = i;
+      }
+    }
+    Node* min_value = tree.at(min_pos);
+    if ((min_value->i == i_end_) && (min_value->j == j_end_)) {
+      cout << "encontre salida";
+      fin = true;
+    }
+    cout << "saco";
+    tree.erase(tree.begin()+min_pos);
+    visited_(min_value->i,min_value->j) = true;
+      matrix_(min_value->i,min_value->j)=PATH_SOL_ID;
+      actual_i = min_value->i;
+      actual_j = min_value->j;
+      if (isOK(min_value->i-1,min_value->j)) { // norte  1
+        minN = Manhattan(min_value->i-1,min_value->j);
+        cout << "Puedo ir norte, meto: " << minN << endl;
+        Node* a = new Node {minN,min_value->i-1,min_value->j,1,0};
+        tree.push_back(a);
+      }
+      if (isOK(min_value->i+1,min_value->j)) { // sur  2
+        minS = Manhattan(min_value->i+1,min_value->j);
+        cout << "Puedo ir sur, meto: " << minS << endl;
+        Node* a = new Node {minS,min_value->i+1,min_value->j,2,0};
+        tree.push_back(a);
+      }
+      if (isOK(min_value->i,min_value->j-1)) { // oeste  3
+        minO = Manhattan(min_value->i,min_value->j-1);
+        cout << "Puedo ir oeste, meto: " << minO << endl;
+        Node* a = new Node {minO,min_value->i,min_value->j-1,3,0};
+        tree.push_back(a);
+      }
+      if (isOK(min_value->i,min_value->j+1)) { // este  4
+        minE = Manhattan(min_value->i,min_value->j+1);
+        cout << "Puedo ir este, meto: " << minE << endl;
+        Node* a = new Node {minE,min_value->i,min_value->j+1,4,0};
+        tree.push_back(a);
+      }
+  }
 }

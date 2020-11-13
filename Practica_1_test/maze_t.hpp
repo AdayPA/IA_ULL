@@ -47,6 +47,13 @@ private:
   sll_t<char> list_;
   int steps;
   int counter;
+  struct Node {
+    int value_;
+    int i;
+    int j;
+    int move;
+    int stage;
+  };
 
 public:
   maze_t(): matrix_(), visited_(),
@@ -60,6 +67,7 @@ public:
   bool solve(void);
   void camino(void);
   int Manhattan(int i, int j);
+  void A_Start(void);
 
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
