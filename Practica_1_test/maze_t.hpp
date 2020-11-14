@@ -3,6 +3,11 @@
 #include <iostream>
 #include "matrix_t.hpp"
 #include <forward_list>
+#include <fstream>
+#include <string>
+#include <vector>
+#include <algorithm>
+#include <math.h>
 //#include "sll_node_t.hpp"
 //#include "sll_t.hpp"
 
@@ -72,12 +77,13 @@ public:
 
   bool solve(void);
   void camino(void);
+  std::vector<std::string> Split (std::string , std::string);
   int Manhattan(int i, int j);
   int Euclidean(int i, int j);
   void A_Start(void);
-  void A_Start2(void);
-  void A_Start3(void);
-
+  std::vector<int> A_Start2(void);
+  std::vector<int> A_Start3(void);
+  void ReadFile(string);
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
 

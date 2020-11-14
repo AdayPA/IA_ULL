@@ -4,12 +4,27 @@
 
 #include <cassert>
 #include <math.h>
-#include <stdlib.h> 
+#include <stdlib.h>
 
 bool maze_t::solve()
 {
   return solve(i_start_, j_start_);
 }
+
+std::vector<std::string> maze_t::Split (std::string str, std::string delim) {
+  std::vector<std::string> tokens;
+  size_t prev = 0, pos = 0;
+  do {
+    pos = str.find(delim, prev);
+    if (pos == std::string::npos) pos = str.length();
+    std::string token = str.substr(prev, pos-prev);
+    if (!token.empty()) tokens.push_back(token);
+    prev = pos + delim.length();
+  }
+  while (pos < str.length() && prev < str.length());
+  return tokens;
+}
+
 
 void maze_t::ReadFile(void) {
   ifstream file;
@@ -20,10 +35,12 @@ void maze_t::ReadFile(void) {
   bool readyformatrix = false;
   bool valuedeployed = false;
   file.open("maze1.txt");
+  std::vector<std::string> datos;
   while (getline(file, data)) {
     if (readyformatrix == false) {
-      n = data[0] - '0';
-      m = data[2] - '0';
+      datos = Split(data, " ");
+      n = int(datos[0]); 
+      m = int(datos[1]);
       matrix_.resize(n, m);
     }
     if (readyformatrix ==  true) {

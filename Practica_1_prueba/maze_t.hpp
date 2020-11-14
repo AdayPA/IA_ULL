@@ -60,6 +60,7 @@ public:
 
   bool solve(void);
   void camino(void);
+  std::vector<std::string> maze_t::Split (std::string , std::string);
 
   void add_manualobstacle(int i, int j);
   void add_autoobstacle(float percen);
@@ -76,3 +77,4 @@ private:
 
 istream& operator>>(istream&, maze_t&);
 ostream& operator<<(ostream&, const maze_t&);
+o

@@ -72,9 +72,7 @@ public:
 	}
 
 	T& at(int pos){
-
 		assert((pos < sz_) && ((pos >= 0)));
-
 		return v_[pos];
 	}
 	

@@ -1,10 +1,65 @@
 #include "maze_t.hpp"
-//#include "sll_node_t.hpp"
-//#include "sll_t.hpp"
 
-#include <vector>
-#include <algorithm>
-#include <math.h>
+std::vector<std::string> maze_t::Split (std::string str, std::string delim) {
+  std::vector<std::string> tokens;
+  size_t prev = 0, pos = 0;
+  do {
+    pos = str.find(delim, prev);
+    if (pos == std::string::npos) pos = str.length();
+    std::string token = str.substr(prev, pos-prev);
+    if (!token.empty()) tokens.push_back(token);
+    prev = pos + delim.length();
+  }
+  while (pos < str.length() && prev < str.length());
+  return tokens;
+}
+
+void maze_t::ReadFile(string filename) {
+  ifstream file;
+  string data;
+  int n, m, valueformatrix;
+  int position = 0; 
+  int numberoflines = 0; // Hace la función de iterador i, cada vez que ocurre un getline(), se aumenta
+  bool readyformatrix = false;
+  bool valuedeployed = false;
+  file.open(filename);
+  std::vector<std::string> datos;
+  while (getline(file, data)) {
+    if (readyformatrix == false) {
+      datos = Split(data, " ");
+      m = std::stoi(datos[0]); 
+      n = std::stoi(datos[1]);
+      matrix_.resize(m, n);
+      visited_.resize(m,n);
+    }
+    if (readyformatrix ==  true) {
+      numberoflines++;
+      position = 0;
+      for (int j = 1; j <= n; j++) {
+        valuedeployed = false;
+        for (int k = 0; k < data.size(); k++) {
+          if (valuedeployed == false) {
+            valueformatrix = data[position] - '0';
+            valuedeployed = true;
+            if (position < data.size()) {
+              // Los valores van a estar de 2 en 2, por eso hago esta línea
+              position += 2;
+            }
+          }
+        }
+        if (valueformatrix == START_ID)    { i_start_ = numberoflines, j_start_ = j; }
+        else if (valueformatrix == END_ID) { i_end_   = numberoflines, j_end_   = j; }
+        matrix_(numberoflines, j) = valueformatrix;
+        }
+    }
+    readyformatrix =  true;
+  }
+  //cout << "Valores: " << endl;
+  //cout << i_start_ << j_start_ << i_end_ << j_end_ << endl;
+  assert (i_start_ != -1 && j_start_ != -1 && i_end_ != -1 && j_end_ != -1);
+  file.close();
+}
+
 
 istream& maze_t::read(istream& is)
 {
@@ -224,7 +279,7 @@ void maze_t::A_Start(void) {
 }
 
 
-void maze_t::A_Start2(void) {
+std::vector<int> maze_t::A_Start2(void) {
   std::vector<Node*> tree;
   std::vector<std::vector<Node*>> master;
   int minN = 10000;
@@ -232,11 +287,12 @@ void maze_t::A_Start2(void) {
   int minE = 10000;
   int minO = 10000;
   int step = 0;
+  int step_path = 0;
   visited_(i_start_, j_start_) = true;
   if (isOK(i_start_-1,j_start_)) { // norte  1
     visited_(i_start_-1, j_start_) = true;
     minN = Manhattan(i_start_-1,j_start_);
-    cout << "Puedo ir norte, calculo: " << minN << endl;
+    //cout << "Puedo ir norte, calculo: " << minN << endl;
     Node* a = new Node {minN + step,i_start_-1,j_start_,1,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -244,7 +300,7 @@ void maze_t::A_Start2(void) {
   if (isOK(i_start_+1,j_start_)) { // sur  2
     visited_(i_start_+1,j_start_) = true;
     minS = Manhattan(i_start_+1,j_start_);
-    cout << "Puedo ir sur, calculo: " << minS << endl;
+    //cout << "Puedo ir sur, calculo: " << minS << endl;
     Node* a = new Node {minS + step,i_start_+1,j_start_,2,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -252,7 +308,7 @@ void maze_t::A_Start2(void) {
   if (isOK(i_start_,j_start_-1)) { // oeste  3
     visited_(i_start_,j_start_-1) = true;
     minO = Manhattan(i_start_,j_start_-1);
-    cout << "Puedo ir oeste, calculo: " << minO << endl;
+   // cout << "Puedo ir oeste, calculo: " << minO << endl;
     Node* a = new Node {minO + step,i_start_,j_start_-1,3,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -260,7 +316,7 @@ void maze_t::A_Start2(void) {
   if (isOK(i_start_,j_start_+1)) { // este  4
     visited_(i_start_,j_start_+1) = true;
     minE = Manhattan(i_start_,j_start_+1);
-    cout << "Puedo ir este, calculo: " << minE << endl;
+    //cout << "Puedo ir este, calculo: " << minE << endl;
     Node* a = new Node {minE + step,i_start_,j_start_+1,4,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -275,8 +331,8 @@ void maze_t::A_Start2(void) {
   master:       2,2
                 2,3
 */
-  cout << "Master mide: " << endl;
-  cout << master.size() << endl;
+  //cout << "Master mide: " << endl;
+ // cout << master.size() << endl;
   while (!final) {
     ++step;
     /*
@@ -314,7 +370,7 @@ void maze_t::A_Start2(void) {
     if (isOK(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j)) { // norte  1
       visited_(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j) = true;
       minN = Manhattan(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j);
-      cout << "Puedo ir norte, calculo: " << minN << endl;
+      //cout << "Puedo ir norte, calculo: " << minN << endl;
       Node* a = new Node {minN + step,master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j,1,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -336,7 +392,7 @@ void maze_t::A_Start2(void) {
     if (isOK(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j)) { // sur 2
       visited_(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j) = true;
       minS = Manhattan(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j);
-      cout << "Puedo ir sur, calculo: " << minS << endl;
+      //cout << "Puedo ir sur, calculo: " << minS << endl;
       Node* a = new Node {minS + step,master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j,2,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -357,7 +413,7 @@ void maze_t::A_Start2(void) {
     if (isOK(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1)) { // Oeste
       visited_(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1) = true;
       minO = Manhattan(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1);
-      cout << "Puedo ir oeste, calculo: " << minO << endl;
+      //cout << "Puedo ir oeste, calculo: " << minO << endl;
       Node* a = new Node {minO + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1,3,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -378,7 +434,7 @@ void maze_t::A_Start2(void) {
     if (isOK(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1)) { // este 2
       visited_(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1) = true;
       minE = Manhattan(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1);
-      cout << "Puedo ir este, calculo: " << minE << endl;
+      //cout << "Puedo ir este, calculo: " << minE << endl;
       Node* a = new Node {minE + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1,4,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -407,26 +463,31 @@ void maze_t::A_Start2(void) {
   }
 
   
-  cout << "salida: " << salida_final <<endl;
+  //cout << "salida: " << salida_final <<endl;
   for (int k = 0; k < master.at(salida_final).size(); ++k)  {
-    cout << "voy a:" << master.at(salida_final).at(k)->i <<  master.at(salida_final).at(k)->j << endl;
+   // cout << "voy a:" << master.at(salida_final).at(k)->i <<  master.at(salida_final).at(k)->j << endl;
     matrix_(master.at(salida_final).at(k)->i,master.at(salida_final).at(k)->j) = PATH_ID;
+    step_path++;
   }
 
   
-  cout << "traza: " << endl;
+  //cout << "traza: " << endl;
   for (int i = 0; i < master.size(); ++i) {
-    cout << "pos de rama " << i << ": ";
+  //  cout << "pos de rama " << i << ": ";
     for (int j = 0; j < master.at(i).size(); ++j) {
-      cout << master.at(i).at(j)->i << master.at(i).at(j)->j << "->" << master.at(i).at(j)->value_<<", ";
+      //cout << master.at(i).at(j)->i << master.at(i).at(j)->j << "->" << master.at(i).at(j)->value_<<", ";
     }
     cout << endl;
   }
+  std::vector<int> salida;
+  salida.push_back(step_path);
+  salida.push_back(step);
+  return salida;
 
 
 }
 
-void maze_t::A_Start3(void) {
+std::vector<int> maze_t::A_Start3(void) {
   std::vector<Node*> tree;
   std::vector<std::vector<Node*>> master;
   int minN = 10000;
@@ -434,11 +495,12 @@ void maze_t::A_Start3(void) {
   int minE = 10000;
   int minO = 10000;
   int step = 0;
+  int step_path = 0;
   visited_(i_start_, j_start_) = true;
   if (isOK(i_start_-1,j_start_)) { // norte  1
     visited_(i_start_-1, j_start_) = true;
     minN = Euclidean(i_start_-1,j_start_);
-    cout << "Puedo ir norte, calculo: " << minN << endl;
+    //cout << "Puedo ir norte, calculo: " << minN << endl;
     Node* a = new Node {minN + step,i_start_-1,j_start_,1,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -446,7 +508,7 @@ void maze_t::A_Start3(void) {
   if (isOK(i_start_+1,j_start_)) { // sur  2
     visited_(i_start_+1,j_start_) = true;
     minS = Euclidean(i_start_+1,j_start_);
-    cout << "Puedo ir sur, calculo: " << minS << endl;
+    //cout << "Puedo ir sur, calculo: " << minS << endl;
     Node* a = new Node {minS + step,i_start_+1,j_start_,2,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -454,7 +516,7 @@ void maze_t::A_Start3(void) {
   if (isOK(i_start_,j_start_-1)) { // oeste  3
     visited_(i_start_,j_start_-1) = true;
     minO = Euclidean(i_start_,j_start_-1);
-    cout << "Puedo ir oeste, calculo: " << minO << endl;
+    //cout << "Puedo ir oeste, calculo: " << minO << endl;
     Node* a = new Node {minO + step,i_start_,j_start_-1,3,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -462,7 +524,7 @@ void maze_t::A_Start3(void) {
   if (isOK(i_start_,j_start_+1)) { // este  4
     visited_(i_start_,j_start_+1) = true;
     minE = Euclidean(i_start_,j_start_+1);
-    cout << "Puedo ir este, calculo: " << minE << endl;
+    //cout << "Puedo ir este, calculo: " << minE << endl;
     Node* a = new Node {minE + step,i_start_,j_start_+1,4,0};
     tree.push_back(a);
     master.push_back(tree);
@@ -517,7 +579,7 @@ void maze_t::A_Start3(void) {
     if (isOK(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j)) { // norte  1
       visited_(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j) = true;
       minN = Euclidean(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j);
-      cout << "Puedo ir norte, calculo: " << minN << endl;
+      //cout << "Puedo ir norte, calculo: " << minN << endl;
       Node* a = new Node {minN + step,master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j,1,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -539,7 +601,7 @@ void maze_t::A_Start3(void) {
     if (isOK(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j)) { // sur 2
       visited_(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j) = true;
       minS = Euclidean(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j);
-      cout << "Puedo ir sur, calculo: " << minS << endl;
+      //cout << "Puedo ir sur, calculo: " << minS << endl;
       Node* a = new Node {minS + step,master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j,2,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -560,7 +622,7 @@ void maze_t::A_Start3(void) {
     if (isOK(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1)) { // Oeste
       visited_(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1) = true;
       minO = Euclidean(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1);
-      cout << "Puedo ir oeste, calculo: " << minO << endl;
+      //cout << "Puedo ir oeste, calculo: " << minO << endl;
       Node* a = new Node {minO + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1,3,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -581,7 +643,7 @@ void maze_t::A_Start3(void) {
     if (isOK(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1)) { // este 2
       visited_(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1) = true;
       minE = Euclidean(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1);
-      cout << "Puedo ir este, calculo: " << minE << endl;
+      //cout << "Puedo ir este, calculo: " << minE << endl;
       Node* a = new Node {minE + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1,4,0}; 
       std::vector<Node*> tree_temp;
       for (int i = 0; i < master.at(borrar_rama).size(); ++i) {
@@ -610,21 +672,25 @@ void maze_t::A_Start3(void) {
   }
 
   
-  cout << "salida: " << salida_final <<endl;
+  //cout << "salida: " << salida_final <<endl;
   for (int k = 0; k < master.at(salida_final).size(); ++k)  {
-    cout << "voy a:" << master.at(salida_final).at(k)->i <<  master.at(salida_final).at(k)->j << endl;
+    //cout << "voy a:" << master.at(salida_final).at(k)->i <<  master.at(salida_final).at(k)->j << endl;
     matrix_(master.at(salida_final).at(k)->i,master.at(salida_final).at(k)->j) = PATH_ID;
+    step_path++;
   }
 
   
-  cout << "traza: " << endl;
+  //cout << "traza: " << endl;
   for (int i = 0; i < master.size(); ++i) {
-    cout << "pos de rama " << i << ": ";
+   // cout << "pos de rama " << i << ": ";
     for (int j = 0; j < master.at(i).size(); ++j) {
-      cout << master.at(i).at(j)->i << master.at(i).at(j)->j << "->" << master.at(i).at(j)->value_<<", ";
+      //cout << master.at(i).at(j)->i << master.at(i).at(j)->j << "->" << master.at(i).at(j)->value_<<", ";
     }
     cout << endl;
   }
-
+  std::vector<int> salida;
+  salida.push_back(step_path);
+  salida.push_back(step);
+  return salida;
 
 }
