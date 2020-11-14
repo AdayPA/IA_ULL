@@ -3,8 +3,8 @@
 #include <iostream>
 #include "matrix_t.hpp"
 #include <forward_list>
-#include "sll_node_t.hpp"
-#include "sll_t.hpp"
+//#include "sll_node_t.hpp"
+//#include "sll_t.hpp"
 
 //#define TRACE(x) cout << (#x) << ": " << (x) << endl
 
@@ -39,7 +39,7 @@ const short i_d[] = { -1, 0, 1,  0};
 const short j_d[] = {  0, 1, 0, -1};
 
 using namespace std;
-using namespace AED;
+//using namespace AED;
 
 class maze_t 
 {
@@ -47,7 +47,7 @@ private:
   matrix_t_int matrix_;
   matrix_t_bool visited_;
   int i_start_, j_start_, i_end_, j_end_;
-  sll_t<char> list_;
+  //sll_t<char> list_;
   int steps;
   int counter;
   struct Node {
@@ -64,7 +64,7 @@ private:
 public:
   maze_t(): matrix_(), visited_(),
             i_start_(-1), j_start_(-1), 
-            i_end_(-1), j_end_(-1),list_(),
+            i_end_(-1), j_end_(-1),
             steps(0), counter(0)
   { }
     
@@ -73,8 +73,10 @@ public:
   bool solve(void);
   void camino(void);
   int Manhattan(int i, int j);
+  int Euclidean(int i, int j);
   void A_Start(void);
   void A_Start2(void);
+  void A_Start3(void);
 
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
