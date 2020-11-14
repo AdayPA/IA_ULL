@@ -14,7 +14,8 @@ int main()
  /* if (M.solve()) cout << "¡¡ Se ha encontrado una salida al laberinto !!" << endl;
   else           cout << "No se ha podido encontrar la salida del laberinto..." << endl;
 */
-M.A_Start();
+//M.A_Start();
+M.A_Start2();
 cout << M << endl;
 //M.camino();
   return 1;

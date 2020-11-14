@@ -15,6 +15,9 @@
 #define START_ID 8
 #define END_ID   9
 
+#define TRASH_ID 3
+#define TRASH_CHR "X"
+
 #define PATH_SOL_ID -1
 #define PATH_SOL_CHR "▓"
 
@@ -54,7 +57,10 @@ private:
     int move;
     int stage;
   };
-
+  struct Node_f{
+    int i;
+    int j;
+  };
 public:
   maze_t(): matrix_(), visited_(),
             i_start_(-1), j_start_(-1), 
@@ -68,6 +74,7 @@ public:
   void camino(void);
   int Manhattan(int i, int j);
   void A_Start(void);
+  void A_Start2(void);
 
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
