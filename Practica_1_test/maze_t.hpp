@@ -1,14 +1,14 @@
 #pragma once 
 
-#include <iostream>
 #include "matrix_t.hpp"
-#include <forward_list>
+#include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
 #include <algorithm>
 #include <math.h>
-
+#include <ctime>
+#include <chrono>
 
 #define PASS_ID  0
 #define WALL_ID  1
@@ -74,6 +74,7 @@ public:
   int Euclidean(int i, int j);
   std::vector<int> A_Start_Manhattan(void);
   std::vector<int> A_Start_Euclides(void);
+  void AddAutoObstacle(float percen, maze_t&);
   
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;

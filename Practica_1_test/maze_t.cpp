@@ -108,7 +108,6 @@ bool maze_t::isOK(int i, int j)
          !visited_(i, j);
 }
 
-
 istream& operator>>(istream& is, maze_t& M)
 { return M.read(is);
 }
@@ -125,8 +124,35 @@ int maze_t::Euclidean(int i, int j) {
   return sqrt(pow((i - i_end_), 2) + pow((j - j_end_), 2));
 }
 
+void maze_t::AddAutoObstacle(float percen, maze_t& other_maze) {
+  /** 
+   *  Este método añade obstáculos dependiendo del porcentaje
+   *  que le pasemos.
+   **/
+  int space = (matrix_.get_m() * matrix_.get_n()) - 2;  // Calculamos los espacios disponibles
+  int temp = floor(space * percen);                     // Calculamos cuantos de ellos tenemos que cambiar
+  for (int i = 0; i < temp; ++i){
+    auto v1 = rand() % matrix_.get_m() + 1;
+    auto v2 = rand() % matrix_.get_n() + 1;
+    if ( (matrix_(v1,v2) != WALL_ID) ) {
+      matrix_(v1, v2) = WALL_ID;
+      other_maze.matrix_(v1, v2) = WALL_ID;
+    }
+  }
+  other_maze.matrix_(i_start_,j_start_) = START_ID;
+  other_maze.matrix_(i_end_,j_end_) = END_ID;
+  matrix_(i_start_,j_start_) = START_ID;
+  matrix_(i_end_,j_end_) = END_ID;
+}
 
 std::vector<int> maze_t::A_Start_Manhattan(void) {
+  /**   
+   *  En este método aplicamos el algoritmo A* con la heurística de Manhattan.
+   *  En el vector master almacenamos todos los caminos posibles existentes en
+   *  el momento que se calcula el Manhattan de esa posicion.
+   * 
+   **/
+  int nodos_expand = 0;
   std::vector<Node*> tree;
   std::vector<std::vector<Node*>> master;
   int minN = 10000;
@@ -136,11 +162,17 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
   int step = 0;
   int step_path = 0;
   visited_(i_start_, j_start_) = true;
+  /**
+   *  Aqui comprobamos hacia donde nos desplazamos en el inicio y lo
+   *  almacenamos en el master.
+   * */
+
   // Norte
   if (isOK(i_start_-1,j_start_)) { 
     visited_(i_start_-1, j_start_) = true;
     minN = Manhattan(i_start_-1,j_start_);
     Node* a = new Node {minN + step,i_start_-1,j_start_};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -149,6 +181,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
     visited_(i_start_+1,j_start_) = true;
     minS = Manhattan(i_start_+1,j_start_);
     Node* a = new Node {minS + step,i_start_+1,j_start_};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -157,6 +190,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
     visited_(i_start_,j_start_-1) = true;
     minO = Manhattan(i_start_,j_start_-1);
     Node* a = new Node {minO + step,i_start_,j_start_-1};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -165,6 +199,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
     visited_(i_start_,j_start_+1) = true;
     minE = Manhattan(i_start_,j_start_+1);
     Node* a = new Node {minE + step,i_start_,j_start_+1};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -172,6 +207,20 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
   bool final = false;
   int salida_final = -1;
   while (!final) {
+    /**
+     *  Mientras no lleguemos al final, en cada camino del master,
+     *  comprobamos si se puede avanzar más y se acerca al objetivo, 
+     *  seleccionando siempre el menor valor de F. (F = g + h, donde 
+     *  g son los pasos dados y h el valor de la heurística).
+     * 
+     * */
+    if (master.size() == 0) {
+      std::vector<int> salida;
+      salida.push_back(step_path);
+      salida.push_back(step);
+      salida.push_back(nodos_expand);
+      return salida;
+    }
     // Contamos cada vez que nos movemos
     ++step;
     // COMPRUEBO SI HE LLEGADO AL FINAL PARA ACABAR EL WHILE
@@ -181,6 +230,9 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
           salida_final = i;
         }
     }
+    /**
+     *  Aqui busco la rama con el valor mínimo de F
+     * */
     int temp_min = 10000;
     int borrar_rama = -1;
     for (unsigned i = 0; i < master.size(); ++i) {
@@ -191,12 +243,14 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
         }
       }
     }
+    // Ahora tomo ese valor y miro hacia dónde me puedo mover.
     // Norte
     if (isOK(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j)) { 
       visited_(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j) = true;
       minN = Manhattan(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j);
       Node* a = new Node {minN + step,master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -216,6 +270,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
       minS = Manhattan(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j);
       Node* a = new Node {minS + step,master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -235,6 +290,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
       minO = Manhattan(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1);
       Node* a = new Node {minO + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -254,6 +310,7 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
       minE = Manhattan(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1);
       Node* a = new Node {minE + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -269,11 +326,13 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
     }
     master.erase(master.begin() + borrar_rama);
   }
+  //Busco el camino guardado en master donde me lleve al objetivo.
   for (unsigned i = 0; i < master.size(); ++i) {
         if ((master.at(i).back()->i == i_end_) && (master.at(i).back()->j == j_end_)) {
           salida_final = i;
         }
   }
+  //Imprimo la solución y cuento los pasos hacia ella.
   for (unsigned k = 0; k < master.at(salida_final).size(); ++k)  {
     matrix_(master.at(salida_final).at(k)->i,master.at(salida_final).at(k)->j) = PATH_ID;
     step_path++;
@@ -281,10 +340,18 @@ std::vector<int> maze_t::A_Start_Manhattan(void) {
   std::vector<int> salida;
   salida.push_back(step_path);
   salida.push_back(step);
+  salida.push_back(nodos_expand);
   return salida;
 }
 
 std::vector<int> maze_t::A_Start_Euclides(void) {
+    /**   
+   *  En este método aplicamos el algoritmo A* con la heurística de Euclides.
+   *  En el vector master almacenamos todos los caminos posibles existentes en
+   *  el momento que se calcula el Euclides de esa posicion.
+   * 
+   **/
+  int nodos_expand = 0;
   std::vector<Node*> tree;
   std::vector<std::vector<Node*>> master;
   int minN = 10000;
@@ -294,11 +361,16 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
   int step = 0;
   int step_path = 0;
   visited_(i_start_, j_start_) = true;
+    /**
+   *  Aqui comprobamos hacia donde nos desplazamos en el inicio y lo
+   *  almacenamos en el master.
+   * */
   // Norte
   if (isOK(i_start_-1,j_start_)) { 
     visited_(i_start_-1, j_start_) = true;
     minN = Euclidean(i_start_-1,j_start_);
     Node* a = new Node {minN + step,i_start_-1,j_start_};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -307,6 +379,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
     visited_(i_start_+1,j_start_) = true;
     minS = Euclidean(i_start_+1,j_start_);
     Node* a = new Node {minS + step,i_start_+1,j_start_};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -315,6 +388,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
     visited_(i_start_,j_start_-1) = true;
     minO = Euclidean(i_start_,j_start_-1);
     Node* a = new Node {minO + step,i_start_,j_start_-1};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -323,6 +397,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
     visited_(i_start_,j_start_+1) = true;
     minE = Euclidean(i_start_,j_start_+1);
     Node* a = new Node {minE + step,i_start_,j_start_+1};
+    ++nodos_expand;
     tree.push_back(a);
     master.push_back(tree);
   }
@@ -331,6 +406,20 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
   int salida_final = -1;
 
   while (!final) {
+      /**
+     *  Mientras no lleguemos al final, en cada camino del master,
+     *  comprobamos si se puede avanzar más y se acerca al objetivo, 
+     *  seleccionando siempre el menor valor de F. (F = g + h, donde 
+     *  g son los pasos dados y h el valor de la heurística).
+     * 
+     * */
+    if (master.size() == 0) {
+      std::vector<int> salida;
+      salida.push_back(step_path);
+      salida.push_back(step);
+      salida.push_back(nodos_expand);
+      return salida;
+    }
     ++step;
     // COMPRUEBO SI HE LLEGADO AL FINAL PARA ACABAR EL WHILE
     for (unsigned i = 0; i < master.size(); ++i) {
@@ -339,6 +428,9 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
           salida_final = i;
         }
     }
+        /**
+     *  Aqui busco la rama con el valor mínimo de F
+     * */
     int temp_min = 10000;
     int borrar_rama = -1;
     for (unsigned i = 0; i < master.size(); ++i) {
@@ -349,12 +441,14 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
         }
       }
     }
+    // Ahora tomo ese valor y miro hacia dónde me puedo mover.
     // Norte
     if (isOK(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j)) { 
       visited_(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j) = true;
       minN = Euclidean(master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j);
       Node* a = new Node {minN + step,master.at(borrar_rama).back()->i-1,master.at(borrar_rama).back()->j}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -374,6 +468,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
       minS = Euclidean(master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j);
       Node* a = new Node {minS + step,master.at(borrar_rama).back()->i+1,master.at(borrar_rama).back()->j}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -393,6 +488,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
       minO = Euclidean(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1);
       Node* a = new Node {minO + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j-1}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -412,6 +508,7 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
       minE = Euclidean(master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1);
       Node* a = new Node {minE + step,master.at(borrar_rama).back()->i,master.at(borrar_rama).back()->j+1}; 
       std::vector<Node*> tree_temp;
+      ++nodos_expand;
       for (unsigned i = 0; i < master.at(borrar_rama).size(); ++i) {
         Node* b = new Node {master.at(borrar_rama).at(i)->value_,
                             master.at(borrar_rama).at(i)->i,       
@@ -427,11 +524,13 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
     }
     master.erase(master.begin() + borrar_rama);
   }
+  //Busco el camino guardado en master donde me lleve al objetivo.
   for (unsigned i = 0; i < master.size(); ++i) {
         if ((master.at(i).back()->i == i_end_) && (master.at(i).back()->j == j_end_)) {
           salida_final = i;
         }
   }
+  //Imprimo la solución y cuento los pasos hacia ella.
   for (unsigned k = 0; k < master.at(salida_final).size(); ++k)  {
     matrix_(master.at(salida_final).at(k)->i,master.at(salida_final).at(k)->j) = PATH_ID;
     step_path++;
@@ -439,5 +538,6 @@ std::vector<int> maze_t::A_Start_Euclides(void) {
   std::vector<int> salida;
   salida.push_back(step_path);
   salida.push_back(step);
+  salida.push_back(++nodos_expand);
   return salida;
 }
