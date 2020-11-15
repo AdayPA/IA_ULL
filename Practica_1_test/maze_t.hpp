@@ -8,10 +8,7 @@
 #include <vector>
 #include <algorithm>
 #include <math.h>
-//#include "sll_node_t.hpp"
-//#include "sll_t.hpp"
 
-//#define TRACE(x) cout << (#x) << ": " << (x) << endl
 
 #define PASS_ID  0
 #define WALL_ID  1
@@ -44,7 +41,6 @@ const short i_d[] = { -1, 0, 1,  0};
 const short j_d[] = {  0, 1, 0, -1};
 
 using namespace std;
-//using namespace AED;
 
 class maze_t 
 {
@@ -52,15 +48,12 @@ private:
   matrix_t_int matrix_;
   matrix_t_bool visited_;
   int i_start_, j_start_, i_end_, j_end_;
-  //sll_t<char> list_;
   int steps;
   int counter;
   struct Node {
     int value_;
     int i;
     int j;
-    int move;
-    int stage;
   };
   struct Node_f{
     int i;
@@ -75,21 +68,18 @@ public:
     
   ~maze_t() {}
 
-  bool solve(void);
-  void camino(void);
+  void ReadFile(string);
   std::vector<std::string> Split (std::string , std::string);
   int Manhattan(int i, int j);
   int Euclidean(int i, int j);
-  void A_Start(void);
-  std::vector<int> A_Start2(void);
-  std::vector<int> A_Start3(void);
-  void ReadFile(string);
+  std::vector<int> A_Start_Manhattan(void);
+  std::vector<int> A_Start_Euclides(void);
+  
   istream& read(istream& = cin);
   ostream& write(ostream& = cout) const;
 
 private:
   bool isOK(int, int);
-  bool solve(int, int);
 };
 
 istream& operator>>(istream&, maze_t&);

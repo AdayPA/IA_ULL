@@ -7,34 +7,16 @@ using namespace std;
 
 
 int main()
-{ /*
-  maze_t M;
-  
-  cin >> M;
-  
-  cout << M << endl;
-  
- /* if (M.solve()) cout << "¡¡ Se ha encontrado una salida al laberinto !!" << endl;
-  else           cout << "No se ha podido encontrar la salida del laberinto..." << endl;
-
-//M.A_Start();
-M.A_Start2();
-cout << M << endl;
-//M.camino();
-  return 1;*/
-
-//////////////////////////////////////////////////////////////////////////////////////////////
-  string nombre;
+{ 
+  string file;
   std::vector<int> resultado1;
   std::vector<int> resultado2;
-  bool boolean = true;
+  bool fin = true;
   int option = 0;
   maze_t M, C;
-  std::chrono::time_point<std::chrono::system_clock> start, end;
-  
-  //cin >> M;
-  //M.ReadFile();
- while (boolean){
+  std::chrono::time_point<std::chrono::system_clock> start_m, end_m, start_e, end_e;
+
+ while (fin){
     cout << "Menú: " << endl;
     cout << "\t1. Introducir fichero" << endl;
     cout << "\t2. Añadir obstáculos aleatorios " << endl;
@@ -45,51 +27,60 @@ cout << M << endl;
     std::cin >> option;
     switch(option) {
       case 1: { 
+        cout << "\033[2J\033[1;1H";
         cout << "Ingrese el nombre del fichero: ";
-        cin >> nombre;
-        M.ReadFile(nombre);
+        cin >> file;
+        M.ReadFile(file);
         cout << M << endl;
         cout << "Cargado;" << endl;
+        getchar();
         break;
       }  
       case 2: {
+        cout << "\033[2J\033[1;1H";
         cout << "Se han añadido obstaculos aleatorios" << endl;
         cout << M << endl;
+        getchar();
         break; 
       }  
       case 3: {
+        cout << "\033[2J\033[1;1H";
         cout << "Resolviendo con Manhattan " << endl;
-        M.ReadFile(nombre);
-        start = std::chrono::system_clock::now(); 
-        auto start1 = std::chrono::steady_clock::now();
-        resultado1 = M.A_Start2();
-        end = std::chrono::system_clock::now();
-        auto end2 = std::chrono::steady_clock::now(); 
-        std::chrono::duration<double> elapsed_seconds = end - start;         
+        M.ReadFile(file);
+        start_m = std::chrono::system_clock::now(); 
+        resultado1 = M.A_Start_Manhattan();
+        end_m = std::chrono::system_clock::now();        
         cout << M << endl; 
+        getchar();
         break;
       }
       case 4: {
+        cout << "\033[2J\033[1;1H";
         cout << "Resolviendo con Euclides " << endl;
-        C.ReadFile(nombre);
-        //auto t2 = std::chrono::high_resolution_clock::now();
-        resultado2 = C.A_Start3();
-        //auto t3 = std::chrono::high_resolution_clock::now();
-        //auto duration1 = std::chrono::duration_cast<std::chrono::microseconds>( t3 - t2 ).count();
+        C.ReadFile(file);
+        start_e = std::chrono::system_clock::now();
+        resultado2 = C.A_Start_Euclides();
+        end_e = std::chrono::system_clock::now(); 
         cout << C << endl;
+        getchar();
         break;
         }
       case 5: {
+        cout << "\033[2J\033[1;1H";
         cout << "Tiempos: " << endl;
-        //cout << "Tiempo para Manhattan: " << elapsed_seconds << endl;
-        cout << (std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count())  << " milisegundos" << endl;
-        //cout << "Tiempo para Euclides:  " << duration1 << endl;
+        cout << "Tiempo para Manhattan: " << endl;
+        std::chrono::duration<double> elapsed_seconds_m = end_m - start_m;
+        cout << elapsed_seconds_m.count()  << " segundos." << endl;
+        cout << "Tiempo para Euclides:  " << endl;
+        std::chrono::duration<double> elapsed_seconds_e = end_e - start_e;
+        cout << elapsed_seconds_e.count() << " segundos" << endl;
         //cout << "Hay una diferencia de: " << abs (duration1 - duration) << endl;
+        getchar();
         break;
       }
       case 6: {
         cout << "Saliendo" << endl;
-        boolean = false;
+        fin = false;
         break;
       }
     }
